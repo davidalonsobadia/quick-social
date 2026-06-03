@@ -48,6 +48,12 @@ jobs:
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          # PRs in this pipeline are opened by the Implementer as `claude[bot]`. By
+          # default the action refuses bot-initiated events ("Workflow initiated by
+          # non-human actor"); allow our own bot so its PRs get reviewed. Scoped to
+          # `claude` rather than `*` to keep least privilege — the reviewer is already
+          # read-only (`contents: read`), so this only widens *who* it reviews.
+          allowed_bots: "claude"
           # Force tag mode with a tracking comment so the review is posted on the PR.
           track_progress: true
           prompt: |
