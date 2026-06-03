@@ -40,7 +40,7 @@ jobs:
       - name: Run Reviewer agent
         uses: anthropics/claude-code-action@v1
         with:
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           # Force tag mode with a tracking comment so the review is posted on the PR.
           track_progress: true
           prompt: |

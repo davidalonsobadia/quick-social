@@ -45,7 +45,7 @@ jobs:
           # Lets the agent arm auto-merge via `gh` using the job's scoped token.
           GH_TOKEN: ${{ github.token }}
         with:
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           prompt: |
             You are the autonomous Implementer for this repository. Operate exactly as
             specified in `.claude/agents/implementer.md` and follow `CLAUDE.md`.
