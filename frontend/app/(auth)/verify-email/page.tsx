@@ -2,14 +2,14 @@
 
 import type React from "react"
 
-import { useState, useEffect } from "react"
+import { Suspense, useState, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { authApi } from "@/features/auth/api"
 
-export default function VerifyEmailPage() {
+function VerifyEmailContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [error, setError] = useState("")
@@ -95,4 +95,27 @@ export default function VerifyEmailPage() {
   }
 
   return null
+}
+
+function VerifyEmailFallback() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <CardTitle className="text-2xl text-center">Verifying your email...</CardTitle>
+          <CardDescription className="text-center">Please wait while we verify your email address</CardDescription>
+        </CardHeader>
+      </Card>
+    </div>
+  )
+}
+
+// useSearchParams() must be read inside a Suspense boundary so the page can be
+// statically prerendered (Next.js App Router requirement).
+export default function VerifyEmailPage() {
+  return (
+    <Suspense fallback={<VerifyEmailFallback />}>
+      <VerifyEmailContent />
+    </Suspense>
+  )
 }
