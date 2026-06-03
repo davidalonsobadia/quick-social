@@ -72,10 +72,15 @@ jobs:
                 or a must-fix convention violation (e.g. changed behavior with no
                 tests). When genuinely in doubt, choose BLOCK.
             That verdict file is the ONLY file you may create; never edit repo source.
+          # Read/Glob/Grep let the reviewer read surrounding code for context
+          # (previously denied, since only the two Bash patterns were allowed). It
+          # stays strictly read-only: Edit/Write remain disallowed and the token is
+          # `contents: read`, so it can analyze and comment but never modify code.
+          # Bash is limited to git (diff) and echo (the PASS/BLOCK verdict file).
           claude_args: |
             --model claude-sonnet-4-6
             --max-turns 20
-            --allowedTools "Bash(git:*),Bash(echo:*)"
+            --allowedTools "Read,Glob,Grep,TodoWrite,Bash(git:*),Bash(echo:*)"
             --disallowedTools "Edit,Write,WebSearch,WebFetch"
 
       # Turn the agent's verdict into the job's pass/fail status so it can gate the

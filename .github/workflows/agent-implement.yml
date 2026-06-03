@@ -75,6 +75,13 @@ jobs:
         env:
           # Lets the agent arm auto-merge via `gh` using the job's scoped token.
           GH_TOKEN: ${{ github.token }}
+          # Test env at the job level so the agent can run `python run_tests.py`
+          # directly. Previously it followed implementer.md and ran an env-prefixed
+          # command (`TESTING=1 ... python run_tests.py`) whose prefix is not
+          # `python`, so the Bash allowlist denied it and it burned turns retrying.
+          TESTING: "1"
+          DATABASE_URL: sqlite:///./test.db
+          SECRET_KEY: test-secret
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           prompt: |
@@ -100,10 +107,18 @@ jobs:
             run `gh pr merge --auto --squash --delete-branch` on the PR you opened.
 
             Write everything in English.
+          # The previous narrow Bash allowlist caused repeated permission denials
+          # (the agent burned turns on `cd`, `mkdir`, and the env-prefixed test
+          # command, then hit max-turns with permission_denials_count=12). The real
+          # security boundary is the ephemeral runner + a token scoped to `claude/*`
+          # branches (never `main`, which is protected) + no web tools — NOT a Bash
+          # allowlist, which is moot once `python`/`node` are allowed (arbitrary code
+          # anyway). So grant the file tools + Bash and keep web access disallowed.
           claude_args: |
             --model claude-opus-4-8
-            --max-turns 40
-            --allowedTools "Bash(ruff:*),Bash(python:*),Bash(python3:*),Bash(pytest:*),Bash(pip:*),Bash(alembic:*),Bash(pnpm:*),Bash(npx:*),Bash(node:*),Bash(git:*),Bash(gh:*)"
+            --max-turns 60
+            --permission-mode acceptEdits
+            --allowedTools "Edit,Write,Read,Glob,Grep,TodoWrite,Bash"
             --disallowedTools "WebSearch,WebFetch"
 
       - name: Notify Slack - success
