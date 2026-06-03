@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 from typing import List as ListType, Optional
 from app.domains.tasks.models import Task
-from app.domains.tasks.schemas import TaskCreate, TaskUpdate, TaskResponse
+from app.domains.tasks.schemas import TaskCreate, TaskUpdate, TaskResponse, PriorityEnum
 from app.domains.lists.models import List
 
 class TasksService:
@@ -30,10 +30,11 @@ class TasksService:
         self,
         list_id: int,
         user_id: int,
-        completed: Optional[bool] = None
+        completed: Optional[bool] = None,
+        priority: Optional[PriorityEnum] = None
     ) -> ListType[TaskResponse]:
         """
-        Get all tasks for a specific list with optional completed filter
+        Get all tasks for a specific list with optional completed and priority filters
         """
         # Verify list ownership
         self.verify_list_ownership(list_id, user_id)
@@ -47,6 +48,10 @@ class TasksService:
         # Apply completed filter if provided
         if completed is not None:
             query = query.filter(Task.completed == completed)
+
+        # Apply priority filter if provided
+        if priority is not None:
+            query = query.filter(Task.priority == priority)
 
         # Order by: incomplete first, then by due date, then by priority
         tasks = query.order_by(

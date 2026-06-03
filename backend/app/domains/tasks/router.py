@@ -4,7 +4,7 @@ from typing import List, Optional
 from app.db.session import get_db
 from app.domains.auth.utils import get_verified_user
 from app.domains.auth.models import User
-from app.domains.tasks.schemas import TaskCreate, TaskUpdate, TaskResponse, MessageResponse
+from app.domains.tasks.schemas import TaskCreate, TaskUpdate, TaskResponse, MessageResponse, PriorityEnum
 from app.domains.tasks.service import TasksService
 
 router = APIRouter(prefix="/tasks", tags=["tasks"])
@@ -13,17 +13,19 @@ router = APIRouter(prefix="/tasks", tags=["tasks"])
 def get_tasks(
     list_id: int = Query(..., description="ID of the list to get tasks from"),
     completed: Optional[bool] = Query(None, description="Filter by completion status"),
+    priority: Optional[PriorityEnum] = Query(None, description="Filter by priority"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_verified_user)
 ):
     """
-    Get all tasks for a specific list. Optional filter by completion status.
+    Get all tasks for a specific list. Optional filters by completion status and priority.
 
     - **list_id**: Required. The ID of the list to get tasks from
     - **completed**: Optional. Filter tasks by completion status (true/false)
+    - **priority**: Optional. Filter tasks by priority (low/medium/high)
     """
     tasks_service = TasksService(db)
-    return tasks_service.get_tasks_by_list(list_id, current_user.id, completed)
+    return tasks_service.get_tasks_by_list(list_id, current_user.id, completed, priority)
 
 @router.get("/{task_id}", response_model=TaskResponse)
 def get_task(
