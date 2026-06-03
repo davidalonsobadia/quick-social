@@ -59,6 +59,7 @@ jobs:
           claude_args: |
             --model claude-sonnet-4-6
             --max-turns 20
+            --allowedTools "Bash(git:*)"
             --disallowedTools "Edit,Write,WebSearch,WebFetch"
 
       - name: Notify Slack - review posted
