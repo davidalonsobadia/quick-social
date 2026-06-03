@@ -9,10 +9,12 @@ on:
 
 # Least privilege: enough to push a branch, comment on the issue, and open a PR.
 # It can never write to `main` (protected) and gets no other repository scopes.
+# `id-token: write` lets the Claude action mint its GitHub App token via OIDC.
 permissions:
   contents: write
   issues: write
   pull-requests: write
+  id-token: write
 
 concurrency:
   group: agent-implement-${{ github.event.issue.number }}
