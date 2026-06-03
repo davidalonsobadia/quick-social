@@ -38,11 +38,12 @@ class TasksService:
         completed: Optional[bool] = None,
         priority: Optional[PriorityEnum] = None,
         due_after: Optional[date] = None,
-        due_before: Optional[date] = None
+        due_before: Optional[date] = None,
+        overdue: Optional[bool] = None
     ) -> ListType[TaskResponse]:
         """
-        Get all tasks for a specific list with optional completed, priority and
-        due-date range filters
+        Get all tasks for a specific list with optional completed, priority,
+        due-date range and overdue filters
         """
         # Verify list ownership
         self.verify_list_ownership(list_id, user_id)
@@ -68,6 +69,16 @@ class TasksService:
 
         if due_before is not None:
             query = query.filter(Task.due_date.isnot(None), Task.due_date <= due_before)
+
+        # Apply overdue filter if requested: tasks past due are those with a
+        # due_date strictly before today (server date) that are not completed.
+        # Tasks with a null due_date are never considered overdue.
+        if overdue:
+            query = query.filter(
+                Task.due_date.isnot(None),
+                Task.due_date < date.today(),
+                Task.completed.is_(False)
+            )
 
         # Order by: incomplete first, then by due date, then by priority
         tasks = query.order_by(
