@@ -29,24 +29,30 @@ def get_tasks(
     due_before: Optional[date] = Query(
         None, description="Only tasks whose due_date is on or before this date (YYYY-MM-DD)"
     ),
+    overdue: Optional[bool] = Query(
+        None, description="When true, only incomplete tasks whose due_date is before today"
+    ),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_verified_user)
 ):
     """
     Get all tasks for a specific list. Optional filters by completion status,
-    priority and due-date range.
+    priority, due-date range and overdue status.
 
     - **list_id**: Required. The ID of the list to get tasks from
     - **completed**: Optional. Filter tasks by completion status (true/false)
     - **priority**: Optional. Filter tasks by priority (low/medium/high)
     - **due_after**: Optional. Only tasks whose due_date is on or after this date
     - **due_before**: Optional. Only tasks whose due_date is on or before this date
+    - **overdue**: Optional. When true, only incomplete tasks whose due_date is
+      before today (server date)
 
     When a due-date bound is provided, tasks without a due_date are excluded.
+    Tasks with a null due_date are never considered overdue.
     """
     tasks_service = TasksService(db)
     return tasks_service.get_tasks_by_list(
-        list_id, current_user.id, completed, priority, due_after, due_before
+        list_id, current_user.id, completed, priority, due_after, due_before, overdue
     )
 
 @router.get("/{task_id}", response_model=TaskResponse)
