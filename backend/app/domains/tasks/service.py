@@ -1,3 +1,4 @@
+from datetime import date
 from typing import List as ListType
 from typing import Optional
 
@@ -35,10 +36,13 @@ class TasksService:
         list_id: int,
         user_id: int,
         completed: Optional[bool] = None,
-        priority: Optional[PriorityEnum] = None
+        priority: Optional[PriorityEnum] = None,
+        due_after: Optional[date] = None,
+        due_before: Optional[date] = None
     ) -> ListType[TaskResponse]:
         """
-        Get all tasks for a specific list with optional completed and priority filters
+        Get all tasks for a specific list with optional completed, priority and
+        due-date range filters
         """
         # Verify list ownership
         self.verify_list_ownership(list_id, user_id)
@@ -56,6 +60,14 @@ class TasksService:
         # Apply priority filter if provided
         if priority is not None:
             query = query.filter(Task.priority == priority)
+
+        # Apply due_date range filters if provided. Tasks with a null due_date
+        # are excluded when either bound is set.
+        if due_after is not None:
+            query = query.filter(Task.due_date.isnot(None), Task.due_date >= due_after)
+
+        if due_before is not None:
+            query = query.filter(Task.due_date.isnot(None), Task.due_date <= due_before)
 
         # Order by: incomplete first, then by due date, then by priority
         tasks = query.order_by(
