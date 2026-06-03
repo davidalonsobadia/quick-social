@@ -1,0 +1,78 @@
+name: Agent - Review
+
+# Triggered when a PR is opened or updated. The Reviewer agent reviews the diff and
+# posts inline comments. It is read-only on the repository: it cannot modify code.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+# Least privilege: read the code, write only PR comments. NO `contents: write`,
+# so even a prompt-injection attempt in the diff cannot push code.
+permissions:
+  contents: read
+  pull-requests: write
+  issues: read
+
+concurrency:
+  group: agent-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  review:
+    name: review
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Notify Slack - review started
+        if: github.event.action == 'opened'
+        uses: ./.github/actions/slack-notify
+        with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          text: |
+            :mag: *Review started* on PR #${{ github.event.pull_request.number }}: ${{ github.event.pull_request.title }}
+            ${{ github.event.pull_request.html_url }}
+
+      - name: Run Reviewer agent
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          # Force tag mode with a tracking comment so the review is posted on the PR.
+          track_progress: true
+          prompt: |
+            You are the read-only Reviewer for this repository. Operate exactly as
+            specified in `.claude/agents/reviewer.md` and check the change against
+            `CLAUDE.md`.
+
+            Review the diff of PR #${{ github.event.pull_request.number }} against the
+            base branch. Post specific, inline comments for correctness bugs, security
+            flaws, performance problems, and convention violations. Prominently flag
+            anything that could break `main` (prefix such comments with
+            `🚨 MAY BREAK MAIN:`). Do not edit files, approve, or merge. End with a
+            short verdict. Write everything in English.
+          claude_args: |
+            --model claude-sonnet-4-6
+            --max-turns 20
+            --disallowedTools "Edit,Write,WebSearch,WebFetch"
+
+      - name: Notify Slack - review posted
+        if: success()
+        uses: ./.github/actions/slack-notify
+        with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          text: |
+            :speech_balloon: *Review posted* on PR #${{ github.event.pull_request.number }}.
+            ${{ github.event.pull_request.html_url }}
+
+      - name: Notify Slack - review failed
+        if: failure()
+        uses: ./.github/actions/slack-notify
+        with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          text: |
+            :x: *Reviewer FAILED* on PR #${{ github.event.pull_request.number }}.
+            Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}

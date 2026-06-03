@@ -21,3 +21,6 @@ pytest-cov
 httpx
 faker
 sentry-sdk
+
+# Lint
+ruff

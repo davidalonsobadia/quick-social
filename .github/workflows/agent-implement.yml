@@ -1,0 +1,93 @@
+name: Agent - Implement
+
+# Triggered when the `auto` label is added to an issue.
+# The Implementer agent reads the issue, implements a scoped change, runs the
+# checks on the runner, opens a PR that closes the issue, and arms auto-merge.
+on:
+  issues:
+    types: [labeled]
+
+# Least privilege: enough to push a branch, comment on the issue, and open a PR.
+# It can never write to `main` (protected) and gets no other repository scopes.
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+concurrency:
+  group: agent-implement-${{ github.event.issue.number }}
+  cancel-in-progress: false
+
+jobs:
+  implement:
+    name: implement
+    # Only run for the dedicated trigger label.
+    if: github.event.label.name == 'auto'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Notify Slack - started
+        uses: ./.github/actions/slack-notify
+        with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          text: |
+            :building_construction: *Implementer started* on issue #${{ github.event.issue.number }}: ${{ github.event.issue.title }}
+            ${{ github.event.issue.html_url }}
+
+      - name: Run Implementer agent
+        id: implement
+        uses: anthropics/claude-code-action@v1
+        env:
+          # Lets the agent arm auto-merge via `gh` using the job's scoped token.
+          GH_TOKEN: ${{ github.token }}
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            You are the autonomous Implementer for this repository. Operate exactly as
+            specified in `.claude/agents/implementer.md` and follow `CLAUDE.md`.
+
+            Your task is the GitHub issue that triggered this run:
+            issue #${{ github.event.issue.number }}. Read that issue (title and body)
+            for the requirements.
+
+            Decision gate:
+            - If the issue is ambiguous, too large for one safe PR, or would need a
+              destructive change or a secret you cannot infer: DO NOT implement.
+              Post one clear comment on issue #${{ github.event.issue.number }} asking
+              for what you need, then stop.
+            - Otherwise: implement the minimal scoped change, add/update tests under
+              backend/tests/, run the checks on this runner (backend `ruff check .`
+              and the SQLite test suite; if you touched the frontend, `pnpm install
+              --frozen-lockfile`, `pnpm lint`, `pnpm build`), fix any failures, then
+              open a Pull Request whose body includes `Closes #${{ github.event.issue.number }}`.
+
+            After opening the PR, arm auto-merge so it merges once CI passes:
+            run `gh pr merge --auto --squash --delete-branch` on the PR you opened.
+
+            Write everything in English.
+          claude_args: |
+            --model claude-opus-4-8
+            --max-turns 40
+            --disallowedTools "WebSearch,WebFetch"
+
+      - name: Notify Slack - success
+        if: success()
+        uses: ./.github/actions/slack-notify
+        with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          text: |
+            :white_check_mark: *Implementer finished* for issue #${{ github.event.issue.number }} — opened a PR or requested clarification. Check the issue/PR.
+            ${{ github.event.issue.html_url }}
+
+      - name: Notify Slack - failure
+        if: failure()
+        uses: ./.github/actions/slack-notify
+        with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          text: |
+            :x: *Implementer FAILED* for issue #${{ github.event.issue.number }}: ${{ github.event.issue.title }}
+            Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
