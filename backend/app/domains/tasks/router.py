@@ -1,3 +1,4 @@
+from datetime import date
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, Query, status
@@ -22,18 +23,31 @@ def get_tasks(
     list_id: int = Query(..., description="ID of the list to get tasks from"),
     completed: Optional[bool] = Query(None, description="Filter by completion status"),
     priority: Optional[PriorityEnum] = Query(None, description="Filter by priority"),
+    due_after: Optional[date] = Query(
+        None, description="Only tasks whose due_date is on or after this date (YYYY-MM-DD)"
+    ),
+    due_before: Optional[date] = Query(
+        None, description="Only tasks whose due_date is on or before this date (YYYY-MM-DD)"
+    ),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_verified_user)
 ):
     """
-    Get all tasks for a specific list. Optional filters by completion status and priority.
+    Get all tasks for a specific list. Optional filters by completion status,
+    priority and due-date range.
 
     - **list_id**: Required. The ID of the list to get tasks from
     - **completed**: Optional. Filter tasks by completion status (true/false)
     - **priority**: Optional. Filter tasks by priority (low/medium/high)
+    - **due_after**: Optional. Only tasks whose due_date is on or after this date
+    - **due_before**: Optional. Only tasks whose due_date is on or before this date
+
+    When a due-date bound is provided, tasks without a due_date are excluded.
     """
     tasks_service = TasksService(db)
-    return tasks_service.get_tasks_by_list(list_id, current_user.id, completed, priority)
+    return tasks_service.get_tasks_by_list(
+        list_id, current_user.id, completed, priority, due_after, due_before
+    )
 
 @router.get("/{task_id}", response_model=TaskResponse)
 def get_task(
