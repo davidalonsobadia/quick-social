@@ -1,6 +1,8 @@
 from collections import defaultdict
 from typing import Callable, Dict, List
+
 from app.logger import logger
+
 
 class EventBus:
     def __init__(self):

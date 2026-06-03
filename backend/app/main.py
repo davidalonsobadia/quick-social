@@ -1,21 +1,18 @@
-from fastapi import FastAPI, Request, Response
-from fastapi.middleware.cors import CORSMiddleware
-from contextlib import asynccontextmanager
-from starlette.middleware.base import BaseHTTPMiddleware
-
-import sentry_sdk
-from app.api.router import router
-from app.core.config import settings
 import os
 
-from app.core.events.events import event_bus
-from app.core.middleware.api_key import APIKeyMiddleware
-
+import sentry_sdk
+from fastapi import FastAPI, Request, Response
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
+from starlette.middleware.base import BaseHTTPMiddleware
+
+from app import logger
+from app.api.router import router
+from app.core.config import settings
+from app.core.middleware.api_key import APIKeyMiddleware
 from app.db.session import SessionLocal
 from app.domains.api_clients.api_key_loader import load_active_hashed_keys
 
-from app import logger
 
 # Middleware to prevent caching of API responses
 class NoCacheMiddleware(BaseHTTPMiddleware):

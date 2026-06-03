@@ -1,7 +1,9 @@
-from celery import Celery
-from app.core.config import settings
 import os
+
 import sentry_sdk
+from celery import Celery
+
+from app.core.config import settings
 
 # Initialize Sentry for Celery worker (if configured and not testing)
 if settings.SENTRY_DSN and os.environ.get("TESTING") != "1":

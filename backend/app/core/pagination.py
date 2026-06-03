@@ -1,7 +1,6 @@
 from math import ceil
-from typing import Generic, List, Sequence, Tuple, TypeVar
+from typing import List, Sequence, Tuple, TypeVar
 
-from pydantic import BaseModel
 from sqlalchemy.orm import Query
 
 from app.core.schemas import PageMeta, PaginatedResponse

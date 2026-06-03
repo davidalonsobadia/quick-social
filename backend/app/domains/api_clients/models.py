@@ -1,7 +1,10 @@
 from uuid import uuid4
-from sqlalchemy import Column, Date, DateTime, ForeignKey, Integer, String, Boolean, Enum as SqlEnum
-from app.db.base import Base
+
+from sqlalchemy import Boolean, Column, DateTime, String
 from sqlalchemy.sql import func
+
+from app.db.base import Base
+
 
 class APIClient(Base):
     __tablename__ = "api_clients"

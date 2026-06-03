@@ -1,6 +1,8 @@
-from typing import List as ListType, Optional
-from sqlalchemy.orm import Session
+from typing import List as ListType
+from typing import Optional
+
 from fastapi import HTTPException, status
+from sqlalchemy.orm import Session
 
 from . import models, schemas
 

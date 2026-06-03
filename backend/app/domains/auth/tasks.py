@@ -1,9 +1,10 @@
 """
 Celery tasks for authentication domain
 """
+import logging
+
 from app.celery_app import celery
 from app.core.email import EmailService
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -12,7 +13,7 @@ logger = logging.getLogger(__name__)
 def send_verification_email_task(email: str, name: str, verification_token: str):
     """
     Celery task to send verification email asynchronously
-    
+
     Args:
         email: User's email address
         name: User's name
@@ -35,7 +36,7 @@ def send_verification_email_task(email: str, name: str, verification_token: str)
 def send_password_reset_email_task(email: str, name: str, reset_token: str):
     """
     Celery task to send password reset email asynchronously
-    
+
     Args:
         email: User's email address
         name: User's name
@@ -58,7 +59,7 @@ def send_password_reset_email_task(email: str, name: str, reset_token: str):
 def send_welcome_email_task(email: str, name: str):
     """
     Celery task to send welcome email asynchronously
-    
+
     Args:
         email: User's email address
         name: User's name

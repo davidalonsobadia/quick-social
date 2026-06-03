@@ -1,10 +1,18 @@
+from typing import List, Optional
+
 from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.orm import Session
-from typing import List, Optional
+
 from app.db.session import get_db
-from app.domains.auth.utils import get_verified_user
 from app.domains.auth.models import User
-from app.domains.tasks.schemas import TaskCreate, TaskUpdate, TaskResponse, MessageResponse, PriorityEnum
+from app.domains.auth.utils import get_verified_user
+from app.domains.tasks.schemas import (
+    MessageResponse,
+    PriorityEnum,
+    TaskCreate,
+    TaskResponse,
+    TaskUpdate,
+)
 from app.domains.tasks.service import TasksService
 
 router = APIRouter(prefix="/tasks", tags=["tasks"])

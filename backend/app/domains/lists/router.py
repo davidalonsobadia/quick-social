@@ -1,10 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
 from typing import List
 
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+
 from app.db.session import get_db
-from app.domains.auth.utils import get_verified_user
 from app.domains.auth.models import User
+from app.domains.auth.utils import get_verified_user
+
 from . import schemas, service
 
 router = APIRouter(prefix="/lists", tags=["lists"])

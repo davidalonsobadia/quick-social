@@ -1,10 +1,15 @@
-from typing import Optional
-from sqlalchemy.orm import Session
-from fastapi import HTTPException, status
 from datetime import datetime, timedelta
+from typing import Optional
+
+from fastapi import HTTPException, status
+from sqlalchemy.orm import Session
 
 from . import models, schemas, utils
-from .tasks import send_verification_email_task, send_password_reset_email_task, send_welcome_email_task
+from .tasks import (
+    send_password_reset_email_task,
+    send_verification_email_task,
+    send_welcome_email_task,
+)
 
 
 class AuthService:

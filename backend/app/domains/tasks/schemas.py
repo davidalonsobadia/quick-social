@@ -1,7 +1,9 @@
-from pydantic import BaseModel
-from datetime import datetime, date
-from typing import Optional
+from datetime import date, datetime
 from enum import Enum
+from typing import Optional
+
+from pydantic import BaseModel
+
 
 class PriorityEnum(str, Enum):
     low = "low"
@@ -32,7 +34,7 @@ class TaskResponse(BaseModel):
     completed: bool
     created_at: datetime
     updated_at: datetime
-    
+
     class Config:
         from_attributes = True
 

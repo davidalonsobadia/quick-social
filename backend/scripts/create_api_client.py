@@ -12,8 +12,9 @@ script_dir = Path(__file__).parent
 app_dir = script_dir.parent
 sys.path.insert(0, str(app_dir))
 
-from app.db.session import get_db
-from app.domains.api_clients.models import APIClient
+from app.db.session import get_db  # noqa: E402
+from app.domains.api_clients.models import APIClient  # noqa: E402
+
 
 def create_api_key(name: str) -> str:
     raw_key = secrets.token_urlsafe(32)

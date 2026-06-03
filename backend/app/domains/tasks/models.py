@@ -1,8 +1,11 @@
-from sqlalchemy import Column, Integer, String, Text, Boolean, Date, DateTime, ForeignKey, Enum
-from sqlalchemy.orm import relationship
-from datetime import datetime
-from app.db.base import Base
 import enum
+from datetime import datetime
+
+from sqlalchemy import Boolean, Column, Date, DateTime, Enum, ForeignKey, Integer, String, Text
+from sqlalchemy.orm import relationship
+
+from app.db.base import Base
+
 
 class PriorityEnum(str, enum.Enum):
     low = "low"
@@ -11,7 +14,7 @@ class PriorityEnum(str, enum.Enum):
 
 class Task(Base):
     __tablename__ = "tasks"
-    
+
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String, nullable=False)
     description = Column(Text, nullable=True)
@@ -21,6 +24,6 @@ class Task(Base):
     completed = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    
+
     # Relationships
     list = relationship("List", back_populates="tasks")

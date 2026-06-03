@@ -11,21 +11,22 @@ Usage:
     python run_tests.py -v                 # Run with verbose output
 """
 
-import sys
-import subprocess
 import os
+import subprocess
+import sys
+
 
 def run_tests(args=None):
     """Run the test suite using pytest"""
-    
+
     # Set environment variables for testing
     os.environ["DATABASE_URL"] = "sqlite:///./test.db"
     os.environ["TESTING"] = "1"
     os.environ["SECRET_KEY"] = "test-secret-key"
-    
+
     # Base pytest command
     cmd = ["python3", "-m", "pytest"]
-    
+
     # Add default arguments
     default_args = [
         "tests/",           # Test directory
@@ -33,16 +34,16 @@ def run_tests(args=None):
         "-s",               # Don't capture stdout (show print statements)
         "--tb=short",       # Short traceback format
     ]
-    
+
     # Add any additional arguments passed to this script
     if args:
         cmd.extend(args)
     else:
         cmd.extend(default_args)
-    
+
     print(f"Running: {' '.join(cmd)}")
     print("-" * 50)
-    
+
     try:
         result = subprocess.run(cmd, check=False)
         return result.returncode

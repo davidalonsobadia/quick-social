@@ -1,7 +1,8 @@
+import hashlib
+
 from fastapi import Request
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
-import hashlib
 
 EXEMPT_PATHS = [
     "/api/v1/health",
@@ -20,11 +21,11 @@ class APIKeyMiddleware(BaseHTTPMiddleware):
         # Skip OPTIONS requests (preflight)
         if request.method == "OPTIONS":
             return await call_next(request)
-        
+
         # Allow exempt paths without requiring an API key
         if request.url.path in EXEMPT_PATHS:
             return await call_next(request)
-        
+
         raw_key = request.headers.get("x-api-key")
         if not raw_key:
             return JSONResponse(

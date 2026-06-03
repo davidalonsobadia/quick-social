@@ -1,6 +1,8 @@
-from pydantic import BaseModel
 from datetime import datetime
 from typing import Optional
+
+from pydantic import BaseModel
+
 
 class ListCreate(BaseModel):
     name: str
@@ -22,7 +24,7 @@ class ListResponse(BaseModel):
     completed_count: int = 0
     created_at: datetime
     updated_at: datetime
-    
+
     class Config:
         from_attributes = True
 

@@ -1,9 +1,13 @@
-from sqlalchemy.orm import Session
+from typing import List as ListType
+from typing import Optional
+
 from fastapi import HTTPException, status
-from typing import List as ListType, Optional
-from app.domains.tasks.models import Task
-from app.domains.tasks.schemas import TaskCreate, TaskUpdate, TaskResponse, PriorityEnum
+from sqlalchemy.orm import Session
+
 from app.domains.lists.models import List
+from app.domains.tasks.models import Task
+from app.domains.tasks.schemas import PriorityEnum, TaskCreate, TaskResponse, TaskUpdate
+
 
 class TasksService:
     def __init__(self, db: Session):
