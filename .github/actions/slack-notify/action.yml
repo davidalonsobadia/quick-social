@@ -3,7 +3,7 @@ description: "Send a single message to a Slack Incoming Webhook. No-op if the we
 
 inputs:
   webhook:
-    description: "Slack Incoming Webhook URL (pass ${{ secrets.SLACK_WEBHOOK_URL }})."
+    description: "Slack Incoming Webhook URL. Pass the secrets.SLACK_WEBHOOK_URL secret."
     required: true
   text:
     description: "Message text to post (Slack mrkdwn is supported)."
