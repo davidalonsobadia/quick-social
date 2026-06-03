@@ -52,4 +52,24 @@ comment.
 - You may run read-only commands (`ruff check`, the test suite, `pnpm lint`,
   `pnpm build`) to confirm a suspicion, but never modify files.
 - End with a short verdict: the top blocking concerns (if any) and overall risk to
-  `main`. Do not approve or merge — that is decided by CI and branch protection.
+  `main`. You never click "approve" or merge — but your verdict is a merge gate (see
+  below), so be deliberate about it.
+
+## Merge gate: your verdict (when run in CI)
+
+The `agent-review` workflow runs you as a **required status check**: your verdict
+decides whether the PR's armed auto-merge is allowed to proceed. When that workflow
+instructs you to record a verdict, make it your **final action**, writing exactly one
+of these and nothing else to the file:
+
+- `echo PASS > review-verdict.txt` — the change is **safe to merge**: no blocking
+  issues, only nits/observations (if any).
+- `echo BLOCK > review-verdict.txt` — there is **at least one blocking issue**: a
+  `🚨 MAY BREAK MAIN` item, a correctness bug, a security flaw, or a must-fix
+  convention violation (e.g. changed behavior shipped without tests).
+
+Calibrate it: do **not** BLOCK on pure nits or style preferences — those are comments,
+and blocking on them would stall the pipeline. **Do** BLOCK on anything you would not
+want auto-merged into `main`. When genuinely uncertain, BLOCK and explain why; a human
+can override. The verdict file is the **only** file you may ever create; you still
+never edit repository source.
