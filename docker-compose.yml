@@ -4,7 +4,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: api
+    container_name: quick-social-api
     image: taskflow-backend:latest
     command: ["/wait-for-postgres.sh", "db", "python", "start.py"]
     env_file:
@@ -40,7 +40,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     image: taskflow-backend:latest
-    container_name: worker
+    container_name: quick-social-worker
     command: celery -A app.celery_app.celery worker --loglevel=info
     env_file:
       - ./backend/.env
@@ -71,7 +71,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       target: ${FRONTEND_BUILD_TARGET:-development}
-    container_name: frontend
+    container_name: quick-social-frontend
     image: taskflow-frontend:latest
     env_file:
       - ./frontend/.env
@@ -101,7 +101,7 @@ services:
   # Redis - Message broker for Celery
   redis:
     image: redis:7
-    container_name: redis
+    container_name: quick-social-redis
     ports:
       - "${REDIS_PORT:-6379}:6379"
     networks:
@@ -117,7 +117,7 @@ services:
   # PostgreSQL Database
   db:
     image: postgres:15
-    container_name: db
+    container_name: quick-social-db
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
@@ -165,7 +165,7 @@ services:
   # Adminer - Database management UI (disabled by default)
   adminer:
     image: adminer
-    container_name: adminer
+    container_name: quick-social-adminer
     profiles:
       - tools
     ports:
